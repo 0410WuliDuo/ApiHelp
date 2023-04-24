@@ -333,7 +333,7 @@ public class HelloWorld{
 
 #### 1.5.2配置方式
 
-![image-20210923091654365](assets/image-20210923091654365.png)
+![image-20210923091654365](./assets/image-20210923091654365.png)
 
 
 

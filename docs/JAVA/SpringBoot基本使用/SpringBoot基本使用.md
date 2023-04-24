@@ -13,8 +13,6 @@ isComment: false
 
 # **实用开发篇**
 
-====
-
 ## 1. H2 数据库
 
 ### 1.1 首先需要在 pom.xml 文件中配置 maven 插件
@@ -25,7 +23,8 @@ isComment: false
     <artifactId>h2</artifactId>
 </dependency>
 ```
-### 1.2 在pom.xml中添加Web环境
+
+### 1.2 在 pom.xml 中添加 Web 环境
 
 ```XML
 <dependency>
@@ -33,24 +32,27 @@ isComment: false
     <artifactId>spring-boot-starter-web</artifactId>
 </dependency>
 ```
-### 1.3 在application.yml配置文件中配置相应的属性值
+
+### 1.3 在 application.yml 配置文件中配置相应的属性值
+
 ```yml
 spring:
-      h2: 
-    console: 
+      h2:
+    console:
          path: /h2
          enabled: true
 ```
-### 1.4 浏览器访问地址：localhost/h2即可访问
+
+### 1.4 浏览器访问地址：localhost/h2 即可访问
 
 ![H2登录页面](./imgs/H2_login.png)
 
-### 1.5 在1.3的配置后 访问出错需要在spring下面继续配置datasource 进行初始化 初始化之后就可以省略datasource了 完整代码
+### 1.5 在 1.3 的配置后 访问出错需要在 spring 下面继续配置 datasource 进行初始化 初始化之后就可以省略 datasource 了 完整代码
 
 ```yml
 spring:
-      h2: 
-    console: 
+      h2:
+    console:
          path: /h2
          enabled: true
     datasource:
@@ -60,11 +62,13 @@ spring:
                username: sa
                password: 123456
 ```
+
 ### 1.6 配置完成后进入浏览器点击连接 即可进入界面
 
 ![H2首页](./imgs/H2_sy.png)
 
-### 1.7 弄好后需要使用create添加相应的表 然后在测试类中进行测试
+### 1.7 弄好后需要使用 create 添加相应的表 然后在测试类中进行测试
+
 ```java
   @Test
   void testJdbcTemplateSave(@Autowired JdbcTemplate jdbcTemplate) {
@@ -74,4 +78,27 @@ spring:
   }
 ```
 
-## 2. SpringBoot整合Redis
+## 2. SpringBoot 整合 Redis
+
+### 2.1 Redis 的下载安装和基本使用
+
+- 下载地址（windows 版）：[Redis下载](https://github.com/tporadowski/redis/release)
+- 服务端启动命令 当前的安装目录下执行。
+```command
+redis-server.exe redis.windows.conf
+```
+- 客户端启动命令，当前的安装目录下执行，刚开始初始化运行时需要先执行shutdown和exit 在执行上面命令才会运行成功。
+```command
+redis-cli.exe
+输入命令：shutdown
+再次输入：exit
+```
+#### 2.1.1 基本使用
+| 命令 | 说明                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| set key value      | 存值 |
+| get key            | 取值                            |
+| hset key key ··· value    | 深层存值                         |
+| hget key ···              | 深层取值                                |
+| keys *              | 获取所有的key                         |
+| ·········           | 更多，具体查看官网                       |

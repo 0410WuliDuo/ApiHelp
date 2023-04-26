@@ -15,7 +15,7 @@ isComment: false
 
 ## 1. H2 数据库
 
-### 1.1 首先需要在 pom.xml 文件中配置 maven 插件
+### 1.1 首先需要在 pom.xml 文件中导入坐标
 
 ```XML
 <dependency>
@@ -160,7 +160,9 @@ class SpringbootRedisTest {
 }
 
 ```
+
 ### 2.6 读写 Redis 客户端
+
 ```java
 @SpringBootTest
 class SpringbootRedisTest {
@@ -185,15 +187,20 @@ class SpringbootRedisTest {
   ......
 }
 ```
+
 ### 2.7 操作 Redis 客户端实现技术切换(jedis)
-- pom.xml配置索引
+
+- pom.xml 配置索引
+
 ```xml
 <dependency>
     <groupId>redis.clients</groupId>
     <artifactId>jedis</artifactId>
 </dependency>
 ```
-- application.yml添加相应配置
+
+- application.yml 添加相应配置
+
 ```yml
 spring:
   redis:
@@ -201,52 +208,72 @@ spring:
     post: 6379 #端口号
     clinet-type: jedis # 默认lettuce
     jedis:
-       pool:
-         max-active: 16 #最大线程池 
+      pool:
+        max-active: 16 #最大线程池
 ```
-## 3. MongoDB数据库的下载与基本使用
+
+## 3. MongoDB 数据库的下载与基本使用
+
 ### 3.1 简介
-- MongoDB是一个开源，高性能，无模式的文档型数据库。NOSQL数据库产品中的一种，是最像关系型数据库的非关系型的数据库
+
+- MongoDB 是一个开源，高性能，无模式的文档型数据库。NOSQL 数据库产品中的一种，是最像关系型数据库的非关系型的数据库
 - 适用：永久性存储与临时存储相结合，修改频度较高 举例：游戏道具数据，装备数据。直播打赏数据，粉丝数据。
 - 适用：临时存储，修改数据飞快 例如物联网数据
+
 ### 3.2 下载与安装
-- windows版Mongo下载 [Mongo下载](https://www.mongodb.com/try/download)
-- windows版Mongo安装：正常解压或压缩即可，安装后需要在安装目录下新建data文件夹用来存储数据。
-- windows版Mongo启动
+
+- windows 版 Mongo 下载 [Mongo 下载](https://www.mongodb.com/try/download)
+- windows 版 Mongo 安装：正常解压或压缩即可，安装后需要在安装目录下新建 data 文件夹用来存储数据。
+- windows 版 Mongo 启动
+
 ```command
 <!-- 服务端启动 -->
 mongod --dbpath=..\data\db
 <!-- 客户端启动 -->
 mongo --host=127.0.0.1 --port=27017
 ```
-- 可视化编译器robot和studio
-- 如果安装Mongo出现以下错误按需解决
-![错误](./imgs/mongo_error.png)
-1. 下载对应的dll文件（通过互联网搜索即可）
-2. 拷贝到windows安装路径下的system32目录中
-3. 执行命令注册对应的dll文件
+
+- 可视化编译器 robot 和 studio
+- 如果安装 Mongo 出现以下错误按需解决
+  ![错误](./imgs/mongo_error.png)
+
+1. 下载对应的 dll 文件（通过互联网搜索即可）
+2. 拷贝到 windows 安装路径下的 system32 目录中
+3. 执行命令注册对应的 dll 文件
+
 ```command
 regsvr32 vcruntime140_1.dll
 ```
+
 ### 3.3 基本的增删改查
+
 - 增加
+
 ```json
 db.表名.save({"key","value"})
 ```
+
 - 删除
+
 ```json
 db.表名.remove({"key","value"})
 ```
+
 - 修改
+
 ```json
 db.表名.update({"key","value"},($set:{"key","value"}))
 ```
+
 - 查询 所有
+
 ```json
 db.getCollection('表名').find({})
 简写：db.表名.find()
 ```
-### 3.4 导入MongoDB坐标
+
+### 3.4 导入 MongoDB 坐标
+
 - 首先在新建项目时选择项目需要勾 NOSQL 对应的配置插件
   ![Redis_1](./imgs/redis_1.png)
 - 勾选 Spring Data MongoDB
@@ -256,8 +283,8 @@ db.getCollection('表名').find({})
 ```yml
 spring:
   data:
-   mongodb:
-    url: mongodb://localhost/数据库名
+    mongodb:
+      url: mongodb://localhost/数据库名
 ```
 
 #### 3.6 新建测试类 在测试类中调试 MongoDB
@@ -288,5 +315,165 @@ class SpringbootRedisTest {
 ```
 
 ## 4. Elasticsearch(ES)的下载与基本使用
+
 ### 4.1 简介
-- ES是一个分布式全文搜索引擎
+
+- ES 是一个分布式全文搜索引擎
+
+### 4.2 下载和安装
+
+- windows 版 ES 下载[ES 下载](https://www.elastic.co/cn/downloads/elasticsearch)。
+- 正常解压，运行。
+
+```command
+运行 elasticsearch.bat
+```
+
+- IK 分词器下载[IK 分词器](https://github.com/medcl/elasticsearch-analy-ik/releases) 放在 es 目录下的 plugs 文件下新建 ik 文件夹，解压到当前目录。
+
+### 4.3 索引的基本操作
+
+- 直接使用 PostMan 的 Put 访问接口 http://localhost:9200/books 即可添加索引 _注意_ 不可重复添加同名称索引
+- GET：http://localhost:9200/books 访问即可访问同索引下的数据
+- DELETE: http://localhost:9200/books 删除索引
+- 对应索引添加属性
+
+```json
+/**
+id name type remark 为实体类中的名称，按需求修改
+all 为虚拟字段，把name和remark集合在一起 在查询中使用
+all名称自定义 copy_to指向即可
+*/
+{
+  // 固定字段
+  "mappings": {
+    // 固定属性字段
+    "properties": {
+      // 元素名
+      "id": {
+        // 设置id为关键字
+        "type": "keyword"
+        // index:false 不想查询配置index:false
+      },
+      "name": {
+        // name为文本信息 当前字段可以被分词
+        "type": "text",
+        // 使用分词器的插件
+        "analyzer": "ik_max_word",
+        "copy_to":"all",
+      },
+      "type":{
+          "type": "keyword"
+      },
+      "remark":{
+        "type": "text",
+        "analyzer": "ik_max_word",
+        "copy_to":"all",
+      },
+      "all":{
+        "type": "text",
+        "analyzer": "ik_max_word"
+      },
+      ......
+    }
+  }
+}
+```
+
+### 4.3 文档的基本操作
+
+- 直接使用 PostMan 的 POST 访问接口 http://localhost:9200/books/\_doc 或者 http://localhost:9200/books/\_create/2 即可添加成功 加/2 为当前文档的指定 id
+
+```json
+/*
+* 即可添加文档
+* 选择raw JSON格式传值
+*/
+
+{
+ "key":"value"
+ ......
+}
+```
+
+- PUT:http://localhost:9200/books/\_doc/1 修改属性值 1 为想要修改的 id 值，json 里面传什么修改什么。
+
+```json
+/*
+* 全覆盖修改，全部修改。
+* 选择raw JSON格式传值
+*/
+
+{
+ "key":"value"
+ ......
+}
+```
+
+- PUT:http://localhost:9200/books/\_update/1 修改属性值 1 为想要修改的 id 值，json 里面传什么修改什么。
+
+```json
+/*
+* 以文档的形式进行修改，传什么改什么。
+* 选择raw JSON格式传值
+*/
+
+{
+  "doc":{
+    {
+       "key":"value"
+        ......
+    }
+  }
+}
+```
+
+- GET：http://localhost:9200/books/\_doc 访问即可访问文档下的数据 加上/1 就是指定 id 为 1 的文档数据
+- GET：http://localhost:9200/books/\_search 查询全部 后面添加?q=属性名:属性值 可查询
+- DELETE: http://localhost:9200/books/\_doc 删除索引 加上/1 就是指定 id 为 1 的文档数据
+- 对应索引添加属性
+
+### 4.4 首先需要在 pom.xml 文件中导入坐标
+
+```XML
+<!-- 低级别需要的 不适用 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+</dependency>
+<!-- 高级别 -->
+<dependency>
+    <groupId>org.elasticsearch.client</groupId>
+    <artifactId>elasticsearch-rest-high-level-client</artifactId>
+</dependency>
+```
+
+### 4.5 在 application.yml 配置文件中配置相应的属性值
+
+```yml
+#  低级别需要的 不适用
+spring:
+  elasticsearch:
+    rest:
+      uris: http:localhost:9200 #9200 为es的服务器端口号
+```
+
+### 4.6 新建测试类 在测试类中调试 ES
+
+```java
+// 低级别
+@SpringBootTest
+class SpringbootESTest {
+  @Autowired
+  private ElasticsearchRestTemplate esTemplate;
+  @Test
+  void fn(){
+      esTemplate.search();
+  }
+  ......
+}
+
+```
+- 高版本的具体查看网站新的写法，因为有部分的已经过时
+
+

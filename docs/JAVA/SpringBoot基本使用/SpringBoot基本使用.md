@@ -474,6 +474,88 @@ class SpringbootESTest {
 }
 
 ```
+
 - 高版本的具体查看网站新的写法，因为有部分的已经过时
 
+### 4.7 ES 添加文档
 
+```java
+@SpringBootTest
+class SpringbootESTest {
+  @Autowired
+  private ElasticsearchRestTemplate esTemplate;
+  @Test
+  void createDoc() throws IOException{
+    //  实体类 名称 = 实体类Dao.selectById(1);  // 单条
+    // 多条
+     List<实体类> 名称 = 实体类Dao.selectList(null);  // 单条
+     BulkRequest bulkRequest = new BulkRequest();
+     for(实体类 名称1 : 名称) {
+     IndexRequest request  = new IndexRequest("books").id(名称1.getId().toString());
+     // FastJson json对象转字符串
+     String json = JSON.toJSONString(实体类)
+     request.source(Json,XContentType.JSON);
+     client.index(request,RequestOptions.DEFAULT);
+     bulkRequest.add(request);
+     }
+     client.bulk(bulkRequest,RequestOptions.DEFAULT);
+  }
+}
+```
+
+### 4.8 ES 查询文档
+
+```java
+  // 按ID查询
+  @Test
+  void searchById() throws IOException{
+    GetRequest request = new GetRequest("接口名",'id值');
+    GetResponse response = client.get(request,RequestOptions.DEFAULT);
+    String json = response.getSourceAsString();
+    System.out.println(json);
+  }
+  // 按条件查询
+  @Test
+  void searchByQuery() throws IOException{
+    SearchRequest request = new SearchRequest("接口名");
+    SearchSourceBuilder  ssBuilder = new SearchSourceBuilder();
+    ssBuilder.query(QueryBuilders.termQuery("字段名","字段值"));
+    request.source(builder);
+    SearchResponse response = client.search(request,RequestOptions.DEFAULT);
+    SearchHits hits = response.getHits();
+    for(SearchHit hit:hits){
+      String source  = hit.getSourceAsString();
+      实体类 名称 = JSON.parseObject(source,实体类.class);
+      System.out.println(source);
+    }
+  }
+```
+
+## 5. 整合第三方技术(缓存)
+
+### 5.1 简介
+
+- 缓存 是一种介于数据永久存储介质与数据应用之间的数据临时存储介质。
+- 使用缓存可以有效的减少低速数据读取过程的次数（例如磁盘 IO），提高系统性能。
+- 缓存不仅可以用于提高永久性存储介质的数据读取效率，还可以提供临时的数据存储空间。
+
+### 5.2 SpringBoot 提供了缓存技术，方便缓存使用
+
+- 添加索引
+``` xml
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+```
+- 启动容器中添加注解
+```java
+@EnableCaching 
+```
+
+- 在实现类中添加在对应的接口上加上
+``` java
+// value代表存的key值 key为要存的属性值
+@Cacheable(value="cacheSpace",key="#id")
+```
+### 5.3 手机验证码案例

@@ -542,20 +542,117 @@ class SpringbootESTest {
 ### 5.2 SpringBoot 提供了缓存技术，方便缓存使用
 
 - 添加索引
-``` xml
+
+```xml
 <dependency>
    <groupId>org.springframework.boot</groupId>
    <artifactId>spring-boot-starter-cache</artifactId>
 </dependency>
 ```
+
 - 启动容器中添加注解
+
 ```java
-@EnableCaching 
+@EnableCaching
 ```
 
 - 在实现类中添加在对应的接口上加上
-``` java
+
+```java
 // value代表存的key值 key为要存的属性值
 @Cacheable(value="cacheSpace",key="#id")
 ```
-### 5.3 手机验证码案例
+
+### 5.3 手机验证码案例（实现接口并生成 6 位验证码，并判断验证码是否一致）
+
+- 创建实体类
+
+```java
+import lombok.Data;
+
+@Data
+public class SMSCode {
+    private String telNumber;
+    private String code;
+}
+
+```
+
+- 创建工具类
+
+```java
+@Component
+public class Code {
+    public String generator(String telNumber) {
+        int hash = telNumber.hashCode();
+        int encryption = 20236586;
+        long result = hash ^ encryption;
+        long nowTime = System.currentTimeMillis();
+        result = result ^ nowTime;
+        long code = result % 1000000;
+        code = code < 0 ? -code : code;
+        String codeStr = code + "";
+        int len = codeStr.length();
+        for (int i = 0; i < 6 - len; i++) {
+            codeStr = '0' + codeStr;
+        }
+        return codeStr;
+    }
+    @Cacheable(value = "smsCode", key = "#telNumber")
+    public String getCode(String telNumber) {
+        return null;
+    }
+}
+```
+
+- 创建业务类和业务接口
+
+```java
+// 业务接口
+public interface SMSCodeService {
+     String sendCodeToSMS(String telNumber);
+     boolean checkCode(SMSCode smsCode);
+}
+
+// 业务类
+@Service
+public class SMSImpl implements SMSCodeService {
+    @Autowired
+    private Code codeUtils;
+    @Override
+    @CachePut(value = "smsCode", key = "#telNumber")
+    public String sendCodeToSMS(String telNumber) {
+        return codeUtils.generator(telNumber);
+    }
+
+    @Override
+    public boolean checkCode(SMSCode smsCode) {
+        String code = smsCode.getCode();
+        String cacheCode = codeUtils.getCode(smsCode.getTelNumber());
+        return code.equals(cacheCode);
+    }
+}
+
+```
+
+- 创建实现类
+
+```java
+@RestController
+@RequestMapping("/sms")
+public class SMSCodeController {
+    @Autowired
+    private SMSCodeService smsCodeService;
+
+    @GetMapping("/getCode")
+    public Result getCode(@RequestParam String telNumber) {
+        return Result.builder().data(smsCodeService.sendCodeToSMS(telNumber)).build();
+    }
+
+    @PostMapping("checkCode")
+    public Result checkCode(@RequestBody SMSCode smsCode) {
+        return Result.builder().data(smsCodeService.checkCode(smsCode)).build();
+    }
+}
+```
+
